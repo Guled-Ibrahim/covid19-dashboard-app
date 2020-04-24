@@ -30,14 +30,16 @@
         :yesterTotal="yesterday.all.active"
       />
     </div>
-    <div class="ml-16">
-      <h1 class="text-3xl font-semibold mb-5">Country Breakdown</h1>
+    <div class="flex justify-center ml-16 mr-16">
       <input
         type="text"
-        placeholder="search"
-        class="mb-5 appearance-none bg-transparent border-b-2 border-gray-700 focus:border-blue-500 text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none"
+        placeholder="search by country"
+        class="w-full rounded shadow p-5"
+        v-bind="input"
       />
-      <Table />
+    </div>
+    <div class="flex justify-center mt-5">
+      <Table :data="country.data" />
     </div>
   </div>
 </template>
@@ -45,12 +47,17 @@
 <script>
 import "../node_modules/@fortawesome//fontawesome-free/css/all.css";
 import axios from "axios";
+
 import Card from "../src/components/Card";
 import Table from "./components/Table";
 
 export default {
   data() {
     return {
+      input: "",
+      country: {
+        data: []
+      },
       today: {
         all: {
           cases: 0,
@@ -88,7 +95,6 @@ export default {
         this.yesterday.all.cases = res.data.cases[key];
         this.yesterday.all.deaths = res.data.deaths[key];
         this.yesterday.all.recovered = res.data.recovered[key];
-        console.log(res.data.recovered[key]);
       });
     axios
       .get("https://corona.lmao.ninja/v2/continents?yesterday=true&sort=active")
@@ -99,7 +105,15 @@ export default {
         }
         this.yesterday.all.active = total;
       });
+    axios
+      .get("https://corona.lmao.ninja/v2/countries?yesterday=false")
+      .then(res => {
+        for (let country of res.data) {
+          this.country.data.push(country);
+        }
+      });
   },
+
   computed: {}
 };
 </script>
