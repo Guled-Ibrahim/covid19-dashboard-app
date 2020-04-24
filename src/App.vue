@@ -32,14 +32,20 @@
     </div>
     <div class="flex justify-center ml-16 mr-16">
       <input
+        v-model="input"
         type="text"
         placeholder="search by country"
         class="w-full rounded shadow p-5"
-        v-bind="input"
+        v-on:keyup.enter="searchCountry()"
       />
     </div>
-    <div class="flex justify-center mt-5">
-      <Table :data="country.data" />
+    <div class="flex justify-center mt-5 mb-5">
+      <Table
+        :data="country.data"
+        :showAllData="showAllData"
+        :showFilteredData="showFilteredData"
+        :filteredData="filteredData"
+      />
     </div>
   </div>
 </template>
@@ -55,6 +61,9 @@ export default {
   data() {
     return {
       input: "",
+      showAllData: true,
+      showFilteredData: false,
+      filteredData: {},
       country: {
         data: []
       },
@@ -80,7 +89,20 @@ export default {
     Card,
     Table
   },
-  methods: {},
+  methods: {
+    searchCountry() {
+      axios
+        .get(
+          "https://corona.lmao.ninja/v2/countries/" +
+            this.input +
+            "?yesterday=false"
+        )
+        .then(res => {
+          this.filteredData = res;
+        });
+      (this.showAllData = false), (this.showFilteredData = true);
+    }
+  },
   mounted() {
     axios.get("https://corona.lmao.ninja/v2/all").then(res => {
       this.today.all.cases = res.data.cases;
@@ -111,10 +133,9 @@ export default {
         for (let country of res.data) {
           this.country.data.push(country);
         }
+        this.showAllData = true;
       });
-  },
-
-  computed: {}
+  }
 };
 </script>
 
